@@ -105,7 +105,8 @@ export function BtnPrimary({ onClick, children, id }: { onClick: () => void; chi
     <button
       id={id}
       onClick={onClick}
-      className="px-4 py-2 rounded-lg bg-[var(--accent)] text-primary text-[13px] font-semibold hover:bg-[var(--accent)] transition-all duration-150 shadow-lg"
+      style={{ backgroundColor: 'var(--accent-btn)' }}
+      className="px-4 py-2 rounded-lg text-white text-[13px] font-semibold hover:brightness-110 transition-all duration-150 shadow-md cursor-pointer"
     >
       {children}
     </button>

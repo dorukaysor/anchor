@@ -18,6 +18,19 @@ interface CachedWallpapers {
 
 const SUPPORTED_EXTENSIONS = new Set(['.jpg', '.jpeg', '.png', '.webp', '.gif', '.avif'])
 
+export function isVideoUrl(url: string): boolean {
+  if (!url) return false
+  const clean = url.split('?')[0].split('#')[0].toLowerCase()
+  return (
+    clean.endsWith('.mp4') ||
+    clean.endsWith('.webm') ||
+    clean.endsWith('.ogg') ||
+    clean.endsWith('.mov') ||
+    clean.endsWith('.m4v') ||
+    url.startsWith('data:video/')
+  )
+}
+
 export const LEGACY_WALLPAPER_MAP: Record<string, string> = {
   w1: '0001.jpg',
   w2: '0002.jpg',

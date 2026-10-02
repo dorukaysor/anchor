@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAnchorStore } from './Store'
 import { THEME_PRESETS } from './Schema'
-import { resolveWallpaperUrl } from './lib/wallpapers'
+import { resolveWallpaperUrl, isVideoUrl } from './lib/wallpapers'
 import { Sidebar } from './components/Sidebar'
 import { BoardsArea } from './components/BoardsArea'
 
@@ -89,14 +89,13 @@ function App() {
     root.style.setProperty('--color-bottom', colors.bottom)
 
     // Accent colors (derivatives auto-computed via color-mix in CSS)
-    const rawAccent = labelColors.activePage
-    const isTooDark = !rawAccent || rawAccent === '#000000' || rawAccent.toLowerCase() === '#0a0a0f'
-    const safeAccent = isTooDark ? '#818cf8' : rawAccent
-    root.style.setProperty('--accent',     safeAccent)
-    root.style.setProperty('--accent-btn', labelColors.linkButton || '#6366f1')
+    const activeColor = labelColors.activePage || '#a78bfa'
+    const btnColor = labelColors.linkButton || '#7c3aed'
+    root.style.setProperty('--accent',     activeColor)
+    root.style.setProperty('--accent-btn', btnColor)
   }, [theme, labelColors, glassEnabled, panelVisibility, panelOpacity])
 
-  /* Wallpaper URL (supports images and animated GIFs) */
+  /* Wallpaper URL (supports images, animated GIFs, and video wallpapers) */
   let wallpaperUrl = ''
   if (wallpaper.presetId === 'custom') {
     wallpaperUrl = wallpaper.customUrl ?? ''
@@ -104,10 +103,17 @@ function App() {
     wallpaperUrl = resolveWallpaperUrl(wallpaper.presetId, availableWallpapers)
   }
 
+  const isVideo = isVideoUrl(wallpaperUrl)
+
   /* Preload wallpaper image to avoid visual snapping / popping */
   useEffect(() => {
     if (!wallpaperUrl) {
       setWallpaperLoaded(true)
+      return
+    }
+    if (isVideo) {
+      // Video elements handle readiness via onCanPlay / onLoadedData
+      setWallpaperLoaded(false)
       return
     }
     setWallpaperLoaded(false)
@@ -126,10 +132,10 @@ function App() {
       img.onload = null
       img.onerror = null
     }
-  }, [wallpaperUrl])
+  }, [wallpaperUrl, isVideo])
 
   return (
-    <div className="relative w-full h-screen overflow-hidden py-0 md:p-2 bg-[#08081a]">
+    <div className="relative w-full h-screen overflow-hidden py-0 md:p-2 bg-[#09090b]">
       {/* ── Gradient background layer ── */}
       <div
         className={`fixed inset-0 z-0 app-gradient transition-opacity duration-700 ease-out ${
@@ -140,16 +146,46 @@ function App() {
 
       {/* ── Wallpaper layer with smooth scale & blur cross-fade ── */}
       {wallpaperUrl && (
-        <div
-          key={wallpaperUrl}
-          className={`fixed inset-0 z-1 bg-cover bg-center transition-all duration-700 ease-out ${
-            wallpaperLoaded && isLoaded
-              ? (wallpaper.opacityMode === 'semi-transparent' ? 'opacity-45 scale-100 blur-0' : 'opacity-100 scale-100 blur-0')
-              : 'opacity-0 scale-[1.02] blur-[6px]'
-          }`}
-          style={{ backgroundImage: `url(${wallpaperUrl})` }}
-          aria-hidden="true"
-        />
+        isVideo ? (
+          <video
+            key={wallpaperUrl}
+            src={wallpaperUrl}
+            autoPlay
+            loop
+            muted
+            playsInline
+            onLoadedData={() => setWallpaperLoaded(true)}
+            onCanPlay={() => setWallpaperLoaded(true)}
+            onError={() => setWallpaperLoaded(true)}
+            ref={el => {
+              if (el) {
+                el.defaultMuted = true
+                el.muted = true
+                el.play().catch(() => {})
+                if (el.readyState >= 2) {
+                  setWallpaperLoaded(true)
+                }
+              }
+            }}
+            className={`fixed inset-0 z-1 w-full h-full object-cover pointer-events-none transition-all duration-700 ease-out ${
+              wallpaperLoaded && isLoaded
+                ? (wallpaper.opacityMode === 'semi-transparent' ? 'opacity-45 scale-100 blur-0' : 'opacity-100 scale-100 blur-0')
+                : 'opacity-0 scale-[1.02] blur-[6px]'
+            }`}
+            aria-hidden="true"
+          />
+        ) : (
+          <div
+            key={wallpaperUrl}
+            className={`fixed inset-0 z-1 bg-cover bg-center transition-all duration-700 ease-out ${
+              wallpaperLoaded && isLoaded
+                ? (wallpaper.opacityMode === 'semi-transparent' ? 'opacity-45 scale-100 blur-0' : 'opacity-100 scale-100 blur-0')
+                : 'opacity-0 scale-[1.02] blur-[6px]'
+            }`}
+            style={{ backgroundImage: `url(${wallpaperUrl})` }}
+            aria-hidden="true"
+          />
+        )
       )}
 
       {/* ── Main App Shell with Spring Entrance ── */}
@@ -181,7 +217,7 @@ function App() {
             initial={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3, ease: 'easeOut' }}
-            className="fixed inset-0 z-[99999] pointer-events-none flex flex-col items-center justify-center bg-[#08081a]/50 backdrop-blur-xs"
+            className="fixed inset-0 z-[99999] pointer-events-none flex flex-col items-center justify-center bg-[#09090b]/50 backdrop-blur-xs"
           >
             <motion.div
               initial={{ scaleX: 0 }}

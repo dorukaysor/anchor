@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import { motion, LayoutGroup } from 'framer-motion'
 import { useAnchorStore } from '../Store'
 import { SEARCH_ENGINES } from '../Schema'
+import { isVideoUrl } from '../lib/wallpapers'
 import { IconX } from './icons'
 import { springs } from '../lib/theme'
 
@@ -220,7 +221,7 @@ export function SettingsPanel({ onClose }: { onClose: () => void }) {
                 <input
                   id="custom-wallpaper-input"
                   className="flex-1 px-3.5 py-2 rounded-xl bg-white/[0.04] border border-white/[0.08] text-white text-[13px] placeholder:text-white/25 outline-none focus:border-white/30 focus:bg-white/[0.07] transition-all font-sans"
-                  placeholder="Paste image or GIF URL…"
+                  placeholder="Paste image, GIF, or video URL (.mp4, .webm)…"
                   onKeyDown={e => {
                     if (e.key === 'Enter') {
                       const input = e.target as HTMLInputElement
@@ -265,6 +266,7 @@ export function SettingsPanel({ onClose }: { onClose: () => void }) {
                     const isSelected =
                       store.wallpaper.presetId === 'custom' &&
                       store.wallpaper.customUrl === url
+                    const isVideo = isVideoUrl(url)
 
                     return (
                       <div
@@ -280,13 +282,36 @@ export function SettingsPanel({ onClose }: { onClose: () => void }) {
                           }`}
                           onClick={() => store.setCustomWallpaper(url)}
                         >
-                          <img
-                            src={url}
-                            alt=""
-                            loading="lazy"
-                            decoding="async"
-                            className="absolute inset-0 w-full h-full object-cover pointer-events-none"
-                          />
+                          {isVideo ? (
+                            <video
+                              src={url}
+                              muted
+                              loop
+                              autoPlay
+                              playsInline
+                              ref={el => {
+                                if (el) {
+                                  el.defaultMuted = true
+                                  el.muted = true
+                                  el.play().catch(() => {})
+                                }
+                              }}
+                              className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+                            />
+                          ) : (
+                            <img
+                              src={url}
+                              alt=""
+                              loading="lazy"
+                              decoding="async"
+                              className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+                            />
+                          )}
+                          {isVideo && (
+                            <span className="absolute top-1 left-1 z-10 px-1 py-0.2 rounded bg-black/60 text-[8px] font-mono font-bold text-white/80">
+                              VIDEO
+                            </span>
+                          )}
                           <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-150 absolute inset-0 z-10 bg-black/75 flex items-center justify-center text-[9.5px] font-medium text-white px-1 text-center">
                             Custom {idx + 1}
                           </span>
@@ -405,8 +430,8 @@ export function SettingsPanel({ onClose }: { onClose: () => void }) {
               <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-white/45">Accents</span>
               <button
                 onClick={() => {
-                  store.setLabelColor('activePage', '#818cf8')
-                  store.setLabelColor('linkButton', '#6366f1')
+                  store.setLabelColor('activePage', '#a78bfa')
+                  store.setLabelColor('linkButton', '#7c3aed')
                 }}
                 className="text-[10.5px] font-medium text-white/45 hover:text-white/85 transition-colors cursor-pointer"
               >

@@ -125,10 +125,10 @@ export function Sidebar() {
 
         <button
           id="add-page-btn"
-          className="flex items-center justify-center gap-1.5 w-full py-2 mb-4 rounded-xl border border-dashed border-white/15 text-white/55 text-[12.5px] font-medium hover:border-white/35 hover:text-white hover:bg-white/[0.04] transition-all duration-150 cursor-pointer"
+          className="flex items-center justify-center gap-1.5 w-full py-2 mb-4 rounded-xl border border-dashed border-white/15 text-white/60 text-[12.5px] font-medium hover:border-[var(--accent-btn)] hover:text-white hover:bg-[color-mix(in_srgb,var(--accent-btn)_10%,transparent)] transition-all duration-150 cursor-pointer"
           onClick={() => { setPageInput(''); setAddPageOpen(true) }}
         >
-          <IconPlus size={14} /> New page
+          <IconPlus size={14} className="text-[var(--accent-btn)]" /> New page
         </button>
 
         {/* Divider */}
@@ -169,7 +169,8 @@ export function Sidebar() {
                   onKeyDown={onTodoKey}
                 />
                 <button
-                  className="px-2.5 py-1.5 rounded-md bg-surface-1 border border-default text-secondary text-[12px] font-semibold hover:bg-[var(--accent)] hover:border-[var(--accent)] hover:text-primary transition-all duration-150 cursor-pointer"
+                  style={{ backgroundColor: 'var(--accent-btn)' }}
+                  className="px-2.5 py-1.5 rounded-md text-white text-[12px] font-semibold hover:brightness-110 shadow-sm transition-all duration-150 cursor-pointer"
                   onClick={submitTodo}
                 >
                   Add
@@ -291,20 +292,31 @@ function SortablePage({ page, activePageId, setActivePage, setRenameTarget, setP
       <button
         id={`page-btn-${page.id}`}
         className={`
-          flex-1 flex items-center gap-2 px-3 py-2 rounded-xl text-[13.5px] text-left
+          flex-1 flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13.5px] text-left
           transition-colors duration-150 cursor-pointer
           ${isActive
-            ? 'bg-white/[0.13] text-white font-semibold shadow-sm border border-white/12'
+            ? 'text-white font-semibold shadow-sm'
             : 'text-white/60 hover:bg-white/[0.05] hover:text-white/95 border border-transparent'
           }
         `}
+        style={isActive ? {
+          backgroundColor: 'color-mix(in srgb, var(--accent) 22%, transparent)',
+          borderColor: 'color-mix(in srgb, var(--accent) 50%, transparent)',
+          borderWidth: '1px',
+          borderStyle: 'solid',
+          boxShadow: '0 0 16px color-mix(in srgb, var(--accent) 20%, transparent)',
+        } : undefined}
         onClick={() => setActivePage(page.id)}
         onDoubleClick={() => { setRenameTarget(page.id); setPageInput(page.name) }}
         title="Double-click to rename"
       >
         {isActive && (
           <div
-            className="w-1.5 h-1.5 rounded-full shrink-0 bg-[var(--accent)] shadow-xs"
+            className="w-2 h-2 rounded-full shrink-0 shadow-sm"
+            style={{
+              backgroundColor: 'var(--accent)',
+              boxShadow: '0 0 8px var(--accent)',
+            }}
           />
         )}
         <span className="truncate">{page.name}</span>

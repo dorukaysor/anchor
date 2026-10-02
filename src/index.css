@@ -7,16 +7,17 @@
 
 :root {
   /* ── Gradient Theme (runtime, set by JS) ──────────────────────────────────── */
-  --color-top:    #1e1b4b;
-  --color-middle: #0f0d2e;
-  --color-bottom: #08081a;
+  --color-top:    #1c1c1c;
+  --color-middle: #111111;
+  --color-bottom: #080808;
 
   /* ── Accent (runtime, set by JS from labelColors) ─────────────────────────── */
-  --accent:       #818cf8;
+  --accent:       #a78bfa;
   --accent-hover: color-mix(in srgb, var(--accent), #000 22%);
   --accent-muted: color-mix(in srgb, var(--accent), transparent 88%);
   --accent-glow:  0 0 20px color-mix(in srgb, var(--accent), transparent 85%);
-  --accent-btn:   #6366f1;
+  --accent-btn:   #7c3aed;
+  --accent-btn-hover: color-mix(in srgb, var(--accent-btn), #000 15%);
 
   /* ── Surfaces (glass ON by default — neutral obsidian) ─────────────────────── */
   --surface-0: rgba(10, 10, 14, 0.40);

@@ -11,7 +11,8 @@ node_modules
 dist
 dist-ssr
 *.local
-__dev
+
+__dev/
 package-lock.json
 
 # Editor directories and files

@@ -306,7 +306,7 @@ function BoardCard({ board, bookmarkDisplay }: BoardCardProps) {
             <IconPencil />
           </button>
           <button
-            className='w-6 h-6 flex items-center justify-center rounded-md text-tertiary hover:bg-surface-1 hover:text-secondary transition-all duration-150 cursor-pointer'
+            className='w-6 h-6 flex items-center justify-center rounded-md text-tertiary hover:bg-surface-1 hover:text-[var(--accent-btn)] transition-all duration-150 cursor-pointer'
             onClick={(e) => {
               e.stopPropagation();
               setLinkTitle('');

@@ -240,11 +240,11 @@ export function SearchBar({ onAddBoard }: SearchBarProps) {
       <button
         id="search-submit-btn"
         disabled={isNavigating}
-        className={`px-4 py-2 rounded-2xl border text-[13px] font-semibold transition-all duration-150 whitespace-nowrap shrink-0 cursor-pointer ${
-          isNavigating
-            ? 'bg-[var(--accent)] text-white border-[var(--accent)] shadow-md'
-            : 'bg-surface-1 border-default text-secondary hover:bg-surface-2 hover:text-primary hover:border-emphasis'
-        }`}
+        style={{
+          backgroundColor: isNavigating ? 'var(--accent)' : 'color-mix(in srgb, var(--accent-btn) 22%, var(--surface-1))',
+          borderColor: isNavigating ? 'var(--accent)' : 'color-mix(in srgb, var(--accent-btn) 45%, var(--border-default))',
+        }}
+        className="px-4 py-2 rounded-2xl border text-[13px] font-semibold text-white hover:brightness-110 shadow-xs transition-all duration-150 whitespace-nowrap shrink-0 cursor-pointer disabled:opacity-60"
         onClick={navigate}
       >
         {isNavigating ? (
@@ -263,10 +263,10 @@ export function SearchBar({ onAddBoard }: SearchBarProps) {
       <button
         id="add-board-top-btn"
         disabled={isNavigating}
-        className="flex items-center gap-1.5 px-4 py-2 rounded-2xl bg-surface-1 border border-default text-secondary text-[13px] font-semibold hover:bg-surface-2 hover:text-primary hover:border-emphasis transition-all duration-150 whitespace-nowrap shrink-0 cursor-pointer disabled:opacity-50"
+        className="flex items-center gap-1.5 px-4 py-2 rounded-2xl bg-surface-1 border border-default text-secondary text-[13px] font-semibold hover:border-[var(--accent-btn)] hover:text-white hover:bg-[color-mix(in_srgb,var(--accent-btn)_10%,transparent)] transition-all duration-150 whitespace-nowrap shrink-0 cursor-pointer disabled:opacity-50"
         onClick={onAddBoard}
       >
-        <IconPlus size={12} />
+        <IconPlus size={12} className="text-[var(--accent-btn)]" />
         Board
       </button>
 
