@@ -1,23 +1,54 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useAnchorStore } from './Store'
-import { THEME_PRESETS, WALLPAPER_PRESETS } from './Schema'
+import { THEME_PRESETS } from './Schema'
+import { resolveWallpaperUrl } from './lib/wallpapers'
 import { Sidebar } from './components/Sidebar'
 import { BoardsArea } from './components/BoardsArea'
 
 function App() {
-  const theme           = useAnchorStore(s => s.theme)
-  const wallpaper       = useAnchorStore(s => s.wallpaper)
-  const labelColors     = useAnchorStore(s => s.labelColors)
-  const glassEnabled    = useAnchorStore(s => s.glassEnabled)
-  const panelVisibility    = useAnchorStore(s => s.panelVisibility)
-  const panelOpacity       = useAnchorStore(s => s.panelOpacity)
+  const theme               = useAnchorStore(s => s.theme)
+  const wallpaper           = useAnchorStore(s => s.wallpaper)
+  const labelColors         = useAnchorStore(s => s.labelColors)
+  const glassEnabled        = useAnchorStore(s => s.glassEnabled)
+  const panelVisibility     = useAnchorStore(s => s.panelVisibility)
+  const panelOpacity        = useAnchorStore(s => s.panelOpacity)
   const availableWallpapers = useAnchorStore(s => s.availableWallpapers)
   const loadWallpapers      = useAnchorStore(s => s.loadWallpapers)
+
+  const [isLoaded, setIsLoaded] = useState(false)
+  const [wallpaperLoaded, setWallpaperLoaded] = useState(false)
 
   /* Automatically load available wallpapers from GitHub on mount */
   useEffect(() => {
     loadWallpapers()
   }, [loadWallpapers])
+
+  /* Smooth entrance animation on initial mount and when returning via back/forward navigation */
+  useEffect(() => {
+    let showTimer: ReturnType<typeof setTimeout> | null = null
+
+    // Initial entrance trigger
+    const timer = setTimeout(() => {
+      setIsLoaded(true)
+    }, 40)
+
+    const handlePageShow = () => {
+      // Smoothly re-reveal when returning from another site or bfcache
+      setIsLoaded(false)
+      if (showTimer) clearTimeout(showTimer)
+      showTimer = setTimeout(() => {
+        setIsLoaded(true)
+      }, 50)
+    }
+
+    window.addEventListener('pageshow', handlePageShow)
+    return () => {
+      clearTimeout(timer)
+      if (showTimer) clearTimeout(showTimer)
+      window.removeEventListener('pageshow', handlePageShow)
+    }
+  }, [])
 
   /* Apply CSS custom properties + glass attribute for runtime theming */
   useEffect(() => {
@@ -70,36 +101,97 @@ function App() {
   if (wallpaper.presetId === 'custom') {
     wallpaperUrl = wallpaper.customUrl ?? ''
   } else if (wallpaper.presetId !== 'none') {
-    wallpaperUrl = availableWallpapers.find(w => w.id === wallpaper.presetId)?.url
-      ?? WALLPAPER_PRESETS.find(w => w.id === wallpaper.presetId)?.url
-      ?? ''
+    wallpaperUrl = resolveWallpaperUrl(wallpaper.presetId, availableWallpapers)
   }
 
-  return (
-    <div className="relative w-full h-screen overflow-hidden py-0 md:p-2">
-      {/* Gradient background */}
-      <div className="fixed inset-0 z-0 app-gradient transition-all duration-700" aria-hidden="true" />
+  /* Preload wallpaper image to avoid visual snapping / popping */
+  useEffect(() => {
+    if (!wallpaperUrl) {
+      setWallpaperLoaded(true)
+      return
+    }
+    setWallpaperLoaded(false)
+    let cancelled = false
+    const img = new Image()
+    img.onload = () => {
+      if (!cancelled) setWallpaperLoaded(true)
+    }
+    img.onerror = () => {
+      if (!cancelled) setWallpaperLoaded(true)
+    }
+    img.src = wallpaperUrl
 
-      {/* Optional wallpaper layer (Image / animated GIF) */}
+    return () => {
+      cancelled = true
+      img.onload = null
+      img.onerror = null
+    }
+  }, [wallpaperUrl])
+
+  return (
+    <div className="relative w-full h-screen overflow-hidden py-0 md:p-2 bg-[#08081a]">
+      {/* ── Gradient background layer ── */}
+      <div
+        className={`fixed inset-0 z-0 app-gradient transition-opacity duration-700 ease-out ${
+          isLoaded ? 'opacity-100' : 'opacity-0'
+        }`}
+        aria-hidden="true"
+      />
+
+      {/* ── Wallpaper layer with smooth scale & blur cross-fade ── */}
       {wallpaperUrl && (
         <div
           key={wallpaperUrl}
-          className={`fixed inset-0 z-1 bg-cover bg-center transition-opacity duration-700 ${
-            wallpaper.opacityMode === 'semi-transparent' ? 'opacity-45' : 'opacity-100'
+          className={`fixed inset-0 z-1 bg-cover bg-center transition-all duration-700 ease-out ${
+            wallpaperLoaded && isLoaded
+              ? (wallpaper.opacityMode === 'semi-transparent' ? 'opacity-45 scale-100 blur-0' : 'opacity-100 scale-100 blur-0')
+              : 'opacity-0 scale-[1.02] blur-[6px]'
           }`}
           style={{ backgroundImage: `url(${wallpaperUrl})` }}
           aria-hidden="true"
         />
       )}
 
-      {/* App shell */}
-      <div className="relative z-10 flex w-full h-full overflow-hidden" id="app-shell">
+      {/* ── Main App Shell with Spring Entrance ── */}
+      <motion.div
+        id="app-shell"
+        initial={{ opacity: 0, y: 8, scale: 0.995 }}
+        animate={{
+          opacity: isLoaded ? 1 : 0,
+          y: isLoaded ? 0 : 8,
+          scale: isLoaded ? 1 : 0.995,
+        }}
+        transition={{
+          duration: 0.4,
+          ease: [0.16, 1, 0.3, 1],
+        }}
+        className="relative z-10 flex w-full h-full overflow-hidden"
+      >
         <Sidebar />
 
         <main id="main-content" role="main" className="flex-1 flex flex-col min-w-0 overflow-hidden">
           <BoardsArea />
         </main>
-      </div>
+      </motion.div>
+
+      {/* ── Silky Page Reveal Shimmer Beam ── */}
+      <AnimatePresence>
+        {!isLoaded && (
+          <motion.div
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3, ease: 'easeOut' }}
+            className="fixed inset-0 z-[99999] pointer-events-none flex flex-col items-center justify-center bg-[#08081a]/50 backdrop-blur-xs"
+          >
+            <motion.div
+              initial={{ scaleX: 0 }}
+              animate={{ scaleX: 1 }}
+              transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
+              className="absolute top-0 left-0 right-0 h-[2px] bg-[var(--accent)] origin-left shadow-[0_0_12px_var(--accent)]"
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

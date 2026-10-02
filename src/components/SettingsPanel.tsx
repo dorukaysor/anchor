@@ -1,7 +1,8 @@
-import { useRef, type ChangeEvent } from 'react'
+import { useState, useRef, useEffect, type ChangeEvent } from 'react'
+import { createPortal } from 'react-dom'
 import { motion, LayoutGroup } from 'framer-motion'
 import { useAnchorStore } from '../Store'
-import { THEME_PRESETS, SEARCH_ENGINES } from '../Schema'
+import { SEARCH_ENGINES } from '../Schema'
 import { IconX } from './icons'
 import { springs } from '../lib/theme'
 
@@ -61,8 +62,17 @@ function ToggleGroup({ id, options, value, onChange }: ToggleGroupProps) {
 }
 
 export function SettingsPanel({ onClose }: { onClose: () => void }) {
-  const store     = useAnchorStore()
-  const importRef = useRef<HTMLInputElement>(null)
+  const store        = useAnchorStore()
+  const importRef    = useRef<HTMLInputElement>(null)
+  const [confirmReset, setConfirmReset] = useState(false)
+
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') onClose()
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [onClose])
 
   function handleImport(e: ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -83,13 +93,13 @@ export function SettingsPanel({ onClose }: { onClose: () => void }) {
     0.48
   )
 
-  return (
+  return createPortal(
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      transition={{ duration: 0.15 }}
-      className="fixed inset-0 z-[100] flex justify-end bg-black/35 backdrop-blur-[3px]"
+      transition={{ duration: 0.18, ease: 'easeOut' }}
+      className="fixed inset-0 z-[100] flex justify-end bg-black/45"
       onClick={e => { if (e.target === e.currentTarget) onClose() }}
       role="dialog"
       aria-modal="true"
@@ -99,17 +109,20 @@ export function SettingsPanel({ onClose }: { onClose: () => void }) {
         initial={{ x: '100%' }}
         animate={{ x: 0 }}
         exit={{ x: '100%' }}
-        transition={springs.snappy}
+        transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
         className="h-full w-full max-w-[420px] flex flex-col shadow-2xl border-l border-white/[0.08]"
         style={{
-          background: 'rgba(13, 13, 17, 0.86)',
-          backdropFilter: 'blur(28px) saturate(180%)',
-          WebkitBackdropFilter: 'blur(28px) saturate(180%)',
+          background: 'rgba(13, 13, 17, 0.94)',
+          backdropFilter: 'blur(20px) saturate(160%)',
+          WebkitBackdropFilter: 'blur(20px) saturate(160%)',
+          willChange: 'transform',
+          transform: 'translateZ(0)',
+          backfaceVisibility: 'hidden',
         }}
       >
 
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4.5 border-b border-white/[0.08] sticky top-0 z-10 backdrop-blur-md bg-black/25">
+        <div className="flex items-center justify-between px-6 py-4.5 border-b border-white/[0.08] sticky top-0 z-10 bg-[#0d0d11]/92 backdrop-blur-xs">
           <div>
             <h2 id="settings-title" className="text-[16px] font-bold text-white tracking-tight">Settings</h2>
             <p className="text-[11.5px] text-white/40 mt-0.5">Customize your workspace</p>
@@ -126,68 +139,15 @@ export function SettingsPanel({ onClose }: { onClose: () => void }) {
         {/* Scrollable body */}
         <div className="overflow-y-auto flex-1 px-6 py-5 flex flex-col gap-6">
 
-          {/* Theme Presets */}
-          <section className="flex flex-col gap-3">
-            <SectionTitle>Theme Presets</SectionTitle>
-            <div className="grid grid-cols-4 gap-2" role="group" aria-label="Theme presets">
-              {THEME_PRESETS.map(p => {
-                const isSelected = store.theme.presetId === p.id;
-                return (
-                  <button
-                    key={p.id}
-                    id={`theme-${p.id}`}
-                    title={p.label}
-                    aria-label={p.label}
-                    aria-pressed={isSelected}
-                    className={`group relative flex flex-col items-center gap-1.5 p-2 rounded-xl border transition-all duration-150 cursor-pointer ${
-                      isSelected
-                        ? 'bg-white/[0.10] border-white/30 shadow-sm'
-                        : 'bg-white/[0.02] border-white/[0.06] hover:bg-white/[0.06] hover:border-white/[0.12]'
-                    }`}
-                    onClick={() => store.applyThemePreset(p.id)}
-                  >
-                    <div
-                      className="w-full h-6 rounded-md shadow-xs transition-transform group-hover:scale-102"
-                      style={{ background: `linear-gradient(135deg, ${p.top}, ${p.middle}, ${p.bottom})` }}
-                    />
-                    <span className={`text-[10.5px] font-medium truncate w-full text-center ${isSelected ? 'text-white font-semibold' : 'text-white/50 group-hover:text-white/80'}`}>
-                      {p.label}
-                    </span>
-                  </button>
-                )
-              })}
-            </div>
-
-            {/* Custom Theme Gradient */}
-            <div className="flex flex-col gap-2 p-3 rounded-xl bg-white/[0.03] border border-white/[0.07] mt-1">
-              <span className="text-[11.5px] text-white/70 font-medium">Custom Gradient</span>
-              <div className="flex items-center gap-3">
-                {(['top', 'middle', 'bottom'] as const).map(k => (
-                  <div key={k} className="flex-1 flex flex-col gap-1 items-center">
-                    <label className="text-[9.5px] font-semibold uppercase tracking-wider text-white/40">{k}</label>
-                    <div className="relative w-full h-8 rounded-lg overflow-hidden border border-white/15 cursor-pointer hover:border-white/35 transition-colors">
-                      <input
-                        type="color"
-                        id={`custom-color-${k}`}
-                        value={store.theme.custom[k]}
-                        onChange={e => {
-                          const c = { ...store.theme.custom, [k]: e.target.value }
-                          store.setCustomTheme(c.top, c.middle, c.bottom)
-                        }}
-                        className="absolute -top-2 -left-2 w-16 h-16 cursor-pointer opacity-0"
-                      />
-                      <div className="w-full h-full" style={{ backgroundColor: store.theme.custom[k] }} />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </section>
-
           {/* Wallpaper */}
           <section className="flex flex-col gap-3">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-white/45">Wallpaper</span>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-white/45">Wallpaper</span>
+                <span className="text-[10px] font-mono text-white/40 bg-white/[0.06] px-1.5 py-0.2 rounded-md">
+                  {store.availableWallpapers.filter(w => w.id !== 'none').length}
+                </span>
+              </div>
               <button
                 onClick={() => store.loadWallpapers(true)}
                 disabled={store.wallpapersLoading}
@@ -206,51 +166,150 @@ export function SettingsPanel({ onClose }: { onClose: () => void }) {
               </button>
             </div>
 
-            <div className="grid grid-cols-3 gap-2">
-              {store.availableWallpapers.map(wp => (
+            <div className="grid grid-cols-3 gap-2 max-h-72 overflow-y-auto pr-1">
+              {store.availableWallpapers.map(wp => {
+                const isSelected =
+                  store.wallpaper.presetId === wp.id ||
+                  (store.wallpaper.presetId === 'w1' && wp.id === '0001.jpg') ||
+                  (store.wallpaper.presetId === 'w2' && wp.id === '0002.jpg') ||
+                  (store.wallpaper.presetId === 'w3' && wp.id === '0011.jpg') ||
+                  (store.wallpaper.presetId === 'w4' && wp.id === '0013.jpg') ||
+                  (store.wallpaper.presetId === 'w5' && wp.id === '0016.jpg') ||
+                  (store.wallpaper.presetId === 'w6' && wp.id === '0017.jpg') ||
+                  (store.wallpaper.presetId === 'w7' && wp.id === '0021.jpg') ||
+                  (store.wallpaper.presetId === 'w8' && wp.id === '0022.jpg') ||
+                  Boolean(wp.url && store.wallpaper.customUrl && wp.url === store.wallpaper.customUrl)
+
+                return (
+                  <button
+                    key={wp.id}
+                    id={`wallpaper-${wp.id.replace(/[^a-zA-Z0-9_-]/g, '-')}`}
+                    title={wp.label || wp.id}
+                    aria-label={wp.label || wp.id}
+                    aria-pressed={isSelected}
+                    className={`group relative h-14 rounded-xl flex items-center justify-center text-[10.5px] font-semibold text-white/70 bg-white/[0.04] border-2 transition-colors duration-150 cursor-pointer overflow-hidden ${
+                      isSelected ? 'border-white shadow-md' : 'border-transparent hover:border-white/20'
+                    }`}
+                    onClick={() => store.setWallpaperPreset(wp.id)}
+                  >
+                    {wp.url && (
+                      <img
+                        src={wp.url}
+                        alt=""
+                        loading="lazy"
+                        decoding="async"
+                        className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+                      />
+                    )}
+                    {wp.id === 'none' ? (
+                      <span className="relative z-10 text-white/45">None</span>
+                    ) : (
+                      <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-150 absolute inset-0 z-10 bg-black/75 flex items-center justify-center text-[9.5px] font-medium text-white px-1 text-center">
+                        {wp.label}
+                      </span>
+                    )}
+                  </button>
+                )
+              })}
+            </div>
+
+            {/* Custom wallpaper input */}
+            <div className="flex flex-col gap-1.5 pt-1">
+              <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-white/45">Add Custom Wallpaper</span>
+              <div className="flex gap-2">
+                <input
+                  id="custom-wallpaper-input"
+                  className="flex-1 px-3.5 py-2 rounded-xl bg-white/[0.04] border border-white/[0.08] text-white text-[13px] placeholder:text-white/25 outline-none focus:border-white/30 focus:bg-white/[0.07] transition-all font-sans"
+                  placeholder="Paste image or GIF URL…"
+                  onKeyDown={e => {
+                    if (e.key === 'Enter') {
+                      const input = e.target as HTMLInputElement
+                      const val = input.value.trim()
+                      if (val) {
+                        store.addCustomWallpaper(val)
+                        input.value = ''
+                      }
+                    }
+                  }}
+                />
                 <button
-                  key={wp.id}
-                  id={`wallpaper-${wp.id}`}
-                  title={wp.label}
-                  aria-label={wp.label}
-                  aria-pressed={store.wallpaper.presetId === wp.id}
-                  className={`h-14 rounded-xl flex items-center justify-center text-[10.5px] font-semibold text-white/70 bg-white/[0.04] border-2 transition-all duration-150 cursor-pointer overflow-hidden ${
-                    store.wallpaper.presetId === wp.id ? 'border-white shadow-md' : 'border-transparent hover:border-white/20'
-                  }`}
-                  style={wp.url ? { backgroundImage: `url(${wp.url})`, backgroundSize: 'cover', backgroundPosition: 'center' } : undefined}
-                  onClick={() => store.setWallpaperPreset(wp.id)}
+                  className="px-3.5 py-2 rounded-md bg-white/[0.08] border border-white/[0.10] text-white/80 hover:bg-white/[0.16] hover:text-white text-[12px] font-semibold transition-all cursor-pointer shrink-0"
+                  onClick={() => {
+                    const el = document.getElementById('custom-wallpaper-input') as HTMLInputElement
+                    const val = el?.value.trim()
+                    if (val) {
+                      store.addCustomWallpaper(val)
+                      el.value = ''
+                    }
+                  }}
                 >
-                  {wp.id === 'none' && <span className="text-white/45">None (Gradient)</span>}
+                  Add
                 </button>
-              ))}
+              </div>
             </div>
 
-            <div className="flex gap-2">
-              <input
-                id="custom-wallpaper-input"
-                className="flex-1 px-3.5 py-2 rounded-xl bg-white/[0.04] border border-white/[0.08] text-white text-[13px] placeholder:text-white/25 outline-none focus:border-white/30 focus:bg-white/[0.07] transition-all font-sans"
-                placeholder="https://… custom image or GIF URL"
-                defaultValue={store.wallpaper.customUrl ?? ''}
-                onBlur={e => { if (e.target.value.trim()) store.setCustomWallpaper(e.target.value.trim()) }}
-                onKeyDown={e => {
-                  if (e.key === 'Enter') {
-                    const val = (e.target as HTMLInputElement).value.trim()
-                    if (val) store.setCustomWallpaper(val)
-                  }
-                }}
-              />
-              <button
-                className="px-3.5 py-2 rounded-xl bg-white/[0.08] border border-white/[0.10] text-white/80 hover:bg-white/[0.16] hover:text-white text-[12px] font-semibold transition-all cursor-pointer shrink-0"
-                onClick={() => {
-                  const el = document.getElementById('custom-wallpaper-input') as HTMLInputElement
-                  if (el?.value.trim()) store.setCustomWallpaper(el.value.trim())
-                }}
-              >Apply</button>
-            </div>
+            {/* Custom Wallpapers Grid (under default wallpapers grid) */}
+            {store.customWallpapers && store.customWallpapers.length > 0 && (
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-white/45">Custom Wallpapers</span>
+                    <span className="text-[10px] font-mono text-white/40 bg-white/[0.06] px-1.5 py-0.2 rounded-md">
+                      {store.customWallpapers.length}
+                    </span>
+                  </div>
+                </div>
 
-            <p className="text-[10px] text-white/35 px-0.5 leading-normal">
-              Images added to <code className="text-white/60 bg-white/[0.06] px-1 py-0.5 rounded text-[9.5px]">assets/wallpapers/</code> in <span className="text-white/60">dorukaysor/anchor</span> sync automatically.
-            </p>
+                <div className="grid grid-cols-3 gap-2 max-h-52 overflow-y-auto pr-1">
+                  {store.customWallpapers.map((url, idx) => {
+                    const isSelected =
+                      store.wallpaper.presetId === 'custom' &&
+                      store.wallpaper.customUrl === url
+
+                    return (
+                      <div
+                        key={url + '-' + idx}
+                        className="group relative h-14 rounded-xl overflow-hidden"
+                      >
+                        <button
+                          title={url}
+                          aria-label={`Custom wallpaper ${idx + 1}`}
+                          aria-pressed={isSelected}
+                          className={`w-full h-full rounded-xl flex items-center justify-center text-[10.5px] font-semibold text-white/70 bg-white/[0.04] border-2 transition-colors duration-150 cursor-pointer overflow-hidden ${
+                            isSelected ? 'border-white shadow-md' : 'border-transparent hover:border-white/20'
+                          }`}
+                          onClick={() => store.setCustomWallpaper(url)}
+                        >
+                          <img
+                            src={url}
+                            alt=""
+                            loading="lazy"
+                            decoding="async"
+                            className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+                          />
+                          <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-150 absolute inset-0 z-10 bg-black/75 flex items-center justify-center text-[9.5px] font-medium text-white px-1 text-center">
+                            Custom {idx + 1}
+                          </span>
+                        </button>
+
+                        {/* Delete button on hover */}
+                        <button
+                          title="Remove custom wallpaper"
+                          aria-label="Remove custom wallpaper"
+                          className="opacity-0 group-hover:opacity-100 transition-opacity duration-150 absolute top-1 right-1 w-5 h-5 rounded-md bg-black/70 hover:bg-red-500/90 text-white/80 hover:text-white flex items-center justify-center cursor-pointer shadow-md z-10"
+                          onClick={e => {
+                            e.stopPropagation()
+                            store.deleteCustomWallpaper(url)
+                          }}
+                        >
+                          <IconX size={10} />
+                        </button>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
 
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-wider text-white/40 mb-1.5">Wallpaper Opacity</p>
@@ -415,8 +474,72 @@ export function SettingsPanel({ onClose }: { onClose: () => void }) {
               Export your configuration as a portable JSON file. Import validates the schema before replacing your data.
             </p>
           </section>
+
+          {/* Danger Zone */}
+          <section className="flex flex-col gap-3">
+            <div className="flex items-center gap-2 pt-1 pb-0.5">
+              <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-red-400/90">Danger</span>
+              <div className="flex-1 h-px bg-red-500/20" />
+            </div>
+
+            {confirmReset ? (
+              <div className="p-3.5 rounded-xl border border-red-500/40 bg-red-500/10 flex flex-col gap-3">
+                <div className="flex items-start gap-2.5">
+                  <span className="text-base leading-none mt-0.5">⚠️</span>
+                  <div>
+                    <p className="text-[13px] font-bold text-red-100">Confirm Reset</p>
+                    <p className="text-[11.5px] text-white/60 mt-1 leading-relaxed">
+                      Are you sure? This will delete all custom pages, boards, and links stored in <code className="text-white/80 bg-white/10 px-1 py-0.5 rounded text-[10.5px]">anchor-data</code>. Cached wallpapers will not be affected.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 pt-1">
+                  <button
+                    type="button"
+                    id="cancel-reset-btn"
+                    className="flex-1 py-2 px-3 rounded-lg bg-white/[0.08] hover:bg-white/[0.14] text-white/80 text-[12px] font-medium transition-colors cursor-pointer text-center"
+                    onClick={() => setConfirmReset(false)}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    id="confirm-reset-btn"
+                    className="flex-1 py-2 px-3 rounded-lg bg-red-600 hover:bg-red-500 text-white text-[12px] font-bold shadow-md transition-colors cursor-pointer text-center"
+                    onClick={() => {
+                      store.resetToDefaults()
+                      setConfirmReset(false)
+                      onClose()
+                    }}
+                  >
+                    Yes, Reset Everything
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="p-3.5 rounded-xl border border-red-500/25 bg-red-500/[0.05] flex flex-col gap-3">
+                <div>
+                  <p className="text-[13px] font-semibold text-red-200">Reset to Defaults</p>
+                  <p className="text-[11px] text-white/45 mt-0.5 leading-relaxed">
+                    Permanently deletes all pages, boards, links, and preferences stored in <code className="text-white/60 bg-white/[0.06] px-1 py-0.5 rounded text-[10px]">anchor-data</code>. Cached wallpapers from GitHub will be preserved.
+                  </p>
+                </div>
+
+                <button
+                  id="reset-to-defaults-btn"
+                  type="button"
+                  className="w-full py-2.5 px-3 rounded-xl bg-red-500/15 border border-red-500/30 text-red-300 hover:bg-red-500 hover:text-white hover:border-red-500 text-[12.5px] font-semibold transition-all duration-150 cursor-pointer text-center"
+                  onClick={() => setConfirmReset(true)}
+                >
+                  Reset to Defaults
+                </button>
+              </div>
+            )}
+          </section>
         </div>
       </motion.div>
-    </motion.div>
+    </motion.div>,
+    document.body
   )
 }

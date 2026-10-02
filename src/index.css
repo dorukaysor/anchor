@@ -116,6 +116,8 @@
   .glass-surface {
     background: var(--surface-0);
     border-right: 1px solid var(--border-subtle);
+    transform: translateZ(0);
+    backface-visibility: hidden;
   }
   [data-glass="true"] .glass-surface {
     backdrop-filter: blur(24px) saturate(180%);
@@ -129,6 +131,8 @@
   .glass-card {
     background: var(--surface-1);
     border: 1px solid var(--border-default);
+    transform: translateZ(0);
+    backface-visibility: hidden;
   }
   [data-glass="true"] .glass-card {
     backdrop-filter: blur(16px) saturate(150%);
@@ -142,6 +146,8 @@
   .glass-overlay {
     background: var(--surface-3);
     border: 1px solid var(--border-emphasis);
+    transform: translateZ(0);
+    backface-visibility: hidden;
   }
   [data-glass="true"] .glass-overlay {
     backdrop-filter: blur(32px) saturate(180%);
@@ -153,6 +159,8 @@
 
   /* ── Gradient background ── */
   .app-gradient {
+    transform: translateZ(0);
+    backface-visibility: hidden;
     background: linear-gradient(
       155deg,
       var(--color-top)    0%,

@@ -30,7 +30,7 @@ import {
 } from './Modal';
 import { SearchBar } from './SearchBar';
 import { IconPlus, IconPencil, IconTrash, IconEmptyBoards } from './icons';
-import { springs, staggerContainer, staggerItem } from '../lib/theme';
+import { staggerContainer, staggerItem } from '../lib/theme';
 
 /* ── Favicon ── */
 function faviconUrl(url: string) {
@@ -268,7 +268,7 @@ function BoardCard({ board, bookmarkDisplay }: BoardCardProps) {
 
   const style = {
     transform: CSS.Translate.toString(transform),
-    transition,
+    transition: isDragging ? 'none' : transition,
     opacity: isDragging ? 0.4 : 1,
     zIndex: isDragging ? 10 : 1,
   };
@@ -278,9 +278,8 @@ function BoardCard({ board, bookmarkDisplay }: BoardCardProps) {
       ref={setNodeRef}
       style={style}
       variants={staggerItem}
-      transition={springs.gentle}
       id={`board-${board.id}`}
-      className='group w-68 shrink-0 flex flex-col rounded-2xl glass-card hover:border-emphasis hover:shadow-lg transition-all duration-200'
+      className='group w-68 shrink-0 flex flex-col rounded-2xl glass-card hover:border-emphasis hover:shadow-lg transition-[border-color,box-shadow] duration-150'
     >
       {/* Header */}
       <div
@@ -464,15 +463,13 @@ function LinkRow({ link, boardId, bookmarkDisplay, overlay }: LinkRowProps) {
         ref={setNodeRef}
         style={{
           transform: CSS.Transform.toString(transform),
-          transition,
+          transition: isDragging ? 'none' : transition,
           opacity: isDragging && !overlay ? 0.25 : 1,
         }}
         {...attributes}
         {...listeners}
-        className='group/link flex items-center gap-2.5 px-2 py-2 rounded-xl hover:bg-surface-1 transition-all duration-150 cursor-pointer'
+        className='group/link flex items-center gap-2.5 px-2 py-2 rounded-xl hover:bg-surface-1 transition-colors duration-150 cursor-pointer'
         href={link.url}
-        target='_blank'
-        rel='noopener noreferrer'
         id={`link-${link.id}`}
         onClick={(e) => {
           if (isDragging) e.preventDefault();

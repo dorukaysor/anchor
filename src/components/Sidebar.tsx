@@ -169,7 +169,7 @@ export function Sidebar() {
                   onKeyDown={onTodoKey}
                 />
                 <button
-                  className="px-2.5 py-1.5 rounded-lg bg-surface-1 border border-default text-secondary text-[12px] font-semibold hover:bg-[var(--accent)] hover:border-[var(--accent)] hover:text-primary transition-all duration-150 cursor-pointer"
+                  className="px-2.5 py-1.5 rounded-md bg-surface-1 border border-default text-secondary text-[12px] font-semibold hover:bg-[var(--accent)] hover:border-[var(--accent)] hover:text-primary transition-all duration-150 cursor-pointer"
                   onClick={submitTodo}
                 >
                   Add
@@ -279,7 +279,11 @@ export function Sidebar() {
 
 function SortablePage({ page, activePageId, setActivePage, setRenameTarget, setPageInput, deletePage, pagesLength }: any) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: page.id })
-  const style = { transform: CSS.Translate.toString(transform), transition, opacity: isDragging ? 0.3 : 1 }
+  const style = {
+    transform: CSS.Translate.toString(transform),
+    transition: isDragging ? 'none' : transition,
+    opacity: isDragging ? 0.3 : 1,
+  }
   const isActive = activePageId === page.id
 
   return (
@@ -288,7 +292,7 @@ function SortablePage({ page, activePageId, setActivePage, setRenameTarget, setP
         id={`page-btn-${page.id}`}
         className={`
           flex-1 flex items-center gap-2 px-3 py-2 rounded-xl text-[13.5px] text-left
-          transition-all duration-150 cursor-pointer
+          transition-colors duration-150 cursor-pointer
           ${isActive
             ? 'bg-white/[0.13] text-white font-semibold shadow-sm border border-white/12'
             : 'text-white/60 hover:bg-white/[0.05] hover:text-white/95 border border-transparent'
@@ -307,7 +311,7 @@ function SortablePage({ page, activePageId, setActivePage, setRenameTarget, setP
       </button>
       {pagesLength > 1 && (
         <button
-          className="opacity-0 group-hover:opacity-100 absolute right-1.5 w-6 h-6 flex items-center justify-center rounded-lg text-white/40 hover:bg-red-500/15 hover:text-red-400 transition-all duration-150 cursor-pointer"
+          className="opacity-0 group-hover:opacity-100 absolute right-1.5 w-6 h-6 flex items-center justify-center rounded-lg text-white/40 hover:bg-red-500/15 hover:text-red-400 transition-colors duration-150 cursor-pointer"
           onPointerDown={e => e.stopPropagation()}
           onClick={e => { e.stopPropagation(); deletePage(page.id) }}
           aria-label={`Delete ${page.name}`}
@@ -321,14 +325,18 @@ function SortablePage({ page, activePageId, setActivePage, setRenameTarget, setP
 
 function SortableTodo({ todo, toggleTodo, deleteTodo }: any) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: todo.id })
-  const style = { transform: CSS.Translate.toString(transform), transition, opacity: isDragging ? 0.3 : 1 }
+  const style = {
+    transform: CSS.Translate.toString(transform),
+    transition: isDragging ? 'none' : transition,
+    opacity: isDragging ? 0.3 : 1,
+  }
 
   return (
-    <div ref={setNodeRef} style={style} {...attributes} {...listeners} className="group flex items-start gap-2 px-1.5 py-1.5 rounded-lg hover:bg-white/[0.05] transition-all duration-150 cursor-grab active:cursor-grabbing">
+    <div ref={setNodeRef} style={style} {...attributes} {...listeners} className="group flex items-start gap-2 px-1.5 py-1.5 rounded-lg hover:bg-white/[0.05] transition-colors duration-150 cursor-grab active:cursor-grabbing">
       <button
         className={`
           mt-[2px] w-4 h-4 rounded flex-shrink-0 flex items-center justify-center
-          border transition-all duration-150 cursor-pointer
+          border transition-colors duration-150 cursor-pointer
           ${todo.done ? 'bg-[var(--accent)] border-[var(--accent)]' : 'border-white/30 hover:border-white/60'}
         `}
         onPointerDown={e => e.stopPropagation()}

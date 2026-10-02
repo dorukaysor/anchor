@@ -55,6 +55,7 @@ export const AppStateSchema = z.object({
     customUrl: z.string().optional(),
     opacityMode: z.enum(['visible', 'semi-transparent']),
   }),
+  customWallpapers: z.array(z.string()).default([]),
   searchEngine: z.string(),
   panelVisibility: z.enum(['visible', 'semi-visible', 'pure-transparent']),
   panelOpacity: z.number().min(0.05).max(1).default(0.48).optional(),
@@ -88,21 +89,22 @@ const defaultPageId2 = 'page-work'
 export const DEFAULT_STATE: AppState = {
   version: 1,
   theme: {
-    presetId: 'violet',
-    custom: { top: '#312e81', middle: '#1e1b4b', bottom: '#0f0a1e' },
+    presetId: 'carbon',
+    custom: { top: '#1c1c1c', middle: '#111111', bottom: '#080808' },
   },
   wallpaper: {
-    presetId: 'none',
+    presetId: '0021.jpg',
     opacityMode: 'visible',
   },
+  customWallpapers: [],
   searchEngine: 'google',
-  panelVisibility: 'visible',
+  panelVisibility: 'pure-transparent',
   panelOpacity: 0.48,
   glassEnabled: true,
   bookmarkDisplay: 'title-url',
   labelColors: {
-    activePage: '#a78bfa',
-    linkButton: '#7c3aed',
+    activePage: '#000000',
+    linkButton: '#0e0e0e',
   },
   collapsedSections: {},
   pages: [
@@ -113,12 +115,11 @@ export const DEFAULT_STATE: AppState = {
     {
       id: 'board-social',
       pageId: defaultPageId,
-      title: 'Social',
+      title: 'Developer',
       order: 0,
       links: [
-        { id: 'link-gh', title: 'GitHub', url: 'https://github.com', order: 0 },
-        { id: 'link-yt', title: 'YouTube', url: 'https://youtube.com', order: 1 },
-        { id: 'link-tw', title: 'X / Twitter', url: 'https://x.com', order: 2 },
+        { id: 'link-gh', title: 'Developer: Doruk Aysor', url: 'https://github.com/dorukaysor/', order: 0 },
+        { id: 'link-gh2', title: 'Repository: Anchor', url: 'https://github.com/dorukaysor/anchor', order: 1 },
       ],
     },
     {
@@ -145,6 +146,8 @@ export const DEFAULT_STATE: AppState = {
   todos: [
     { id: 'todo-1', pageId: defaultPageId, text: 'Set up Anchor as browser homepage', done: false, order: 0 },
     { id: 'todo-2', pageId: defaultPageId, text: 'Add favorite links', done: false, order: 1 },
+    { id: 'todo-3', pageId: defaultPageId, text: 'Add a new Board', done: false, order: 2 },
+    { id: 'todo-4', pageId: defaultPageId, text: 'Add/Remove a Todo task', done: false, order: 3 },
   ],
   trash: [],
 }
@@ -170,8 +173,7 @@ export const THEME_PRESETS: ThemePreset[] = [
   { id: 'ocean',    label: 'Ocean',    top: '#0c4a6e', middle: '#082f49', bottom: '#020f18' },
   { id: 'midnight', label: 'Midnight', top: '#0f1729', middle: '#080f1f', bottom: '#040810' },
   { id: 'sunset',   label: 'Sunset',   top: '#7c2d12', middle: '#431407', bottom: '#150500' },
-  { id: 'forest',   label: 'Forest',   top: '#14532d', middle: '#052e16', bottom: '#010e07' },
-  { id: 'rainbow',  label: 'Gay',  top: '#ff0000', middle: '#00ff00', bottom: '#0000ff' }
+  { id: 'forest',   label: 'Forest',   top: '#14532d', middle: '#052e16', bottom: '#010e07' }
 ]
 
 // ── Wallpaper presets ─────────────────────────────────────────────────────────
@@ -184,14 +186,31 @@ export interface WallpaperPreset {
 
 export const WALLPAPER_PRESETS: WallpaperPreset[] = [
   { id: 'none', label: 'None', url: '' },
-  { id: 'w1', label: '', url: 'https://raw.githubusercontent.com/dorukaysor/anchor/main/wallpapers/0001.jpg?w=1920&q=80&auto=format&fit=crop' },
-  { id: 'w2', label: '', url: 'https://raw.githubusercontent.com/dorukaysor/anchor/main/wallpapers/0002.jpg?w=1920&q=80&auto=format&fit=crop' },
-  { id: 'w3', label: '', url: 'https://raw.githubusercontent.com/dorukaysor/anchor/main/wallpapers/0011.jpg?w=1920&q=80&auto=format&fit=crop' },
-  { id: 'w4', label: '', url: 'https://raw.githubusercontent.com/dorukaysor/anchor/main/wallpapers/0013.jpg?w=1920&q=80&auto=format&fit=crop' },
-  { id: 'w5', label: '', url: 'https://raw.githubusercontent.com/dorukaysor/anchor/main/wallpapers/0016.jpg?w=1920&q=80&auto=format&fit=crop' },
-  { id: 'w6', label: '', url: 'https://raw.githubusercontent.com/dorukaysor/anchor/main/wallpapers/0017.jpg?w=1920&q=80&auto=format&fit=crop' },
-  { id: 'w7', label: '', url: 'https://raw.githubusercontent.com/dorukaysor/anchor/main/wallpapers/0021.jpg?w=1920&q=80&auto=format&fit=crop' },
-  { id: 'w8', label: '', url: 'https://raw.githubusercontent.com/dorukaysor/anchor/main/wallpapers/0022.jpg?w=1920&q=80&auto=format&fit=crop' },
+  { id: '0001.jpg', label: 'Wallpaper 1', url: 'https://raw.githubusercontent.com/dorukaysor/anchor/main/wallpapers/0001.jpg' },
+  { id: '0002.jpg', label: 'Wallpaper 2', url: 'https://raw.githubusercontent.com/dorukaysor/anchor/main/wallpapers/0002.jpg' },
+  { id: '0003.jpg', label: 'Wallpaper 3', url: 'https://raw.githubusercontent.com/dorukaysor/anchor/main/wallpapers/0003.jpg' },
+  { id: '0004.jpg', label: 'Wallpaper 4', url: 'https://raw.githubusercontent.com/dorukaysor/anchor/main/wallpapers/0004.jpg' },
+  { id: '0005.jpg', label: 'Wallpaper 5', url: 'https://raw.githubusercontent.com/dorukaysor/anchor/main/wallpapers/0005.jpg' },
+  { id: '0006.jpg', label: 'Wallpaper 6', url: 'https://raw.githubusercontent.com/dorukaysor/anchor/main/wallpapers/0006.jpg' },
+  { id: '0007.jpg', label: 'Wallpaper 7', url: 'https://raw.githubusercontent.com/dorukaysor/anchor/main/wallpapers/0007.jpg' },
+  { id: '0008.jpg', label: 'Wallpaper 8', url: 'https://raw.githubusercontent.com/dorukaysor/anchor/main/wallpapers/0008.jpg' },
+  { id: '0009.jpg', label: 'Wallpaper 9', url: 'https://raw.githubusercontent.com/dorukaysor/anchor/main/wallpapers/0009.jpg' },
+  { id: '0010.jpg', label: 'Wallpaper 10', url: 'https://raw.githubusercontent.com/dorukaysor/anchor/main/wallpapers/0010.jpg' },
+  { id: '0011.jpg', label: 'Wallpaper 11', url: 'https://raw.githubusercontent.com/dorukaysor/anchor/main/wallpapers/0011.jpg' },
+  { id: '0012.jpg', label: 'Wallpaper 12', url: 'https://raw.githubusercontent.com/dorukaysor/anchor/main/wallpapers/0012.jpg' },
+  { id: '0013.jpg', label: 'Wallpaper 13', url: 'https://raw.githubusercontent.com/dorukaysor/anchor/main/wallpapers/0013.jpg' },
+  { id: '0014.jpg', label: 'Wallpaper 14', url: 'https://raw.githubusercontent.com/dorukaysor/anchor/main/wallpapers/0014.jpg' },
+  { id: '0015.jpg', label: 'Wallpaper 15', url: 'https://raw.githubusercontent.com/dorukaysor/anchor/main/wallpapers/0015.jpg' },
+  { id: '0016.jpg', label: 'Wallpaper 16', url: 'https://raw.githubusercontent.com/dorukaysor/anchor/main/wallpapers/0016.jpg' },
+  { id: '0017.jpg', label: 'Wallpaper 17', url: 'https://raw.githubusercontent.com/dorukaysor/anchor/main/wallpapers/0017.jpg' },
+  { id: '0018.jpg', label: 'Wallpaper 18', url: 'https://raw.githubusercontent.com/dorukaysor/anchor/main/wallpapers/0018.jpg' },
+  { id: '0019.jpg', label: 'Wallpaper 19', url: 'https://raw.githubusercontent.com/dorukaysor/anchor/main/wallpapers/0019.jpg' },
+  { id: '0020.jpg', label: 'Wallpaper 20', url: 'https://raw.githubusercontent.com/dorukaysor/anchor/main/wallpapers/0020.jpg' },
+  { id: '0021.jpg', label: 'Wallpaper 21', url: 'https://raw.githubusercontent.com/dorukaysor/anchor/main/wallpapers/0021.jpg' },
+  { id: '0022.jpg', label: 'Wallpaper 22', url: 'https://raw.githubusercontent.com/dorukaysor/anchor/main/wallpapers/0022.jpg' },
+  { id: '0023.jpg', label: 'Wallpaper 23', url: 'https://raw.githubusercontent.com/dorukaysor/anchor/main/wallpapers/0023.jpg' },
+  { id: '0024.jpg', label: 'Wallpaper 24', url: 'https://raw.githubusercontent.com/dorukaysor/anchor/main/wallpapers/0024.jpg' },
+  { id: '0025.jpg', label: 'Wallpaper 25', url: 'https://raw.githubusercontent.com/dorukaysor/anchor/main/wallpapers/0025.jpg' },
 ]
 
 // ── Search engines ────────────────────────────────────────────────────────────
@@ -199,7 +218,7 @@ export const WALLPAPER_PRESETS: WallpaperPreset[] = [
 export interface SearchEngine {
   id: string
   label: string
-  url: string // {q} will be replaced with the search term
+  url: string
 }
 
 export const SEARCH_ENGINES: SearchEngine[] = [

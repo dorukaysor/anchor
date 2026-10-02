@@ -18,7 +18,7 @@ import { fetchGitHubWallpapers } from './lib/wallpapers'
 
 // ── localStorage helpers ─────────────────────────────────────────────────────
 
-const LS_KEY = 'anchor-v1'
+const LS_KEY = 'anchor-data'
 
 function loadFromStorage(): AppState {
   try {
@@ -81,9 +81,12 @@ interface AnchorStore extends AppState {
   // Wallpaper
   availableWallpapers: WallpaperPreset[]
   wallpapersLoading: boolean
+  wallpapersLastSynced: number | null
   loadWallpapers: (force?: boolean) => Promise<void>
   setWallpaperPreset: (presetId: string) => void
   setCustomWallpaper: (url: string) => void
+  addCustomWallpaper: (url: string) => void
+  deleteCustomWallpaper: (url: string) => void
   setWallpaperOpacity: (mode: 'visible' | 'semi-transparent') => void
 
   // Settings
@@ -101,6 +104,9 @@ interface AnchorStore extends AppState {
   // Export / Import
   exportState: () => void
   importState: (jsonStr: string) => { success: boolean; error?: string }
+
+  // Reset
+  resetToDefaults: () => void
 }
 
 // ── Store factory helper ─────────────────────────────────────────────────────
@@ -353,12 +359,13 @@ export const useAnchorStore = create<AnchorStore>()((set, get) => {
 
     availableWallpapers: WALLPAPER_PRESETS,
     wallpapersLoading: false,
+    wallpapersLastSynced: null,
 
     async loadWallpapers(force = false) {
       set({ wallpapersLoading: true })
       try {
         const presets = await fetchGitHubWallpapers(force)
-        set({ availableWallpapers: presets, wallpapersLoading: false })
+        set({ availableWallpapers: presets, wallpapersLoading: false, wallpapersLastSynced: Date.now() })
       } catch {
         set({ wallpapersLoading: false })
       }
@@ -370,7 +377,49 @@ export const useAnchorStore = create<AnchorStore>()((set, get) => {
     },
 
     setCustomWallpaper(url) {
-      set(s => ({ wallpaper: { ...s.wallpaper, presetId: 'custom', customUrl: url } }))
+      const cleanUrl = url.trim()
+      if (!cleanUrl) return
+      set(s => {
+        const existing = s.customWallpapers ?? []
+        const updated = existing.includes(cleanUrl) ? existing : [cleanUrl, ...existing]
+        return {
+          wallpaper: { ...s.wallpaper, presetId: 'custom', customUrl: cleanUrl },
+          customWallpapers: updated,
+        }
+      })
+      persist(get)
+    },
+
+    addCustomWallpaper(url) {
+      const cleanUrl = url.trim()
+      if (!cleanUrl) return
+      set(s => {
+        const existing = s.customWallpapers ?? []
+        const updated = existing.includes(cleanUrl) ? existing : [cleanUrl, ...existing]
+        return {
+          wallpaper: { ...s.wallpaper, presetId: 'custom', customUrl: cleanUrl },
+          customWallpapers: updated,
+        }
+      })
+      persist(get)
+    },
+
+    deleteCustomWallpaper(url) {
+      set(s => {
+        const updated = (s.customWallpapers ?? []).filter(u => u !== url)
+        let newWp = s.wallpaper
+        if (s.wallpaper.presetId === 'custom' && s.wallpaper.customUrl === url) {
+          if (updated.length > 0) {
+            newWp = { ...s.wallpaper, presetId: 'custom', customUrl: updated[0] }
+          } else {
+            newWp = { ...s.wallpaper, presetId: '0025.jpg', customUrl: undefined }
+          }
+        }
+        return {
+          customWallpapers: updated,
+          wallpaper: newWp,
+        }
+      })
       persist(get)
     },
 
@@ -471,6 +520,24 @@ export const useAnchorStore = create<AnchorStore>()((set, get) => {
       } catch (err) {
         return { success: false, error: `JSON parse error: ${(err as Error).message}` }
       }
+    },
+
+    resetToDefaults() {
+      if (debounceTimer) {
+        clearTimeout(debounceTimer)
+        debounceTimer = null
+      }
+      localStorage.removeItem(LS_KEY)
+      localStorage.removeItem('anchor-v1')
+      // Note: "anchor_github_wallpapers_cache" is intentionally preserved
+      const freshDefaults = JSON.parse(JSON.stringify(DEFAULT_STATE)) as AppState
+      set(s => ({
+        ...freshDefaults,
+        activePageId: freshDefaults.pages[0]?.id ?? '',
+        availableWallpapers: s.availableWallpapers,
+        wallpapersLoading: s.wallpapersLoading,
+        wallpapersLastSynced: s.wallpapersLastSynced,
+      }))
     },
   }
 })

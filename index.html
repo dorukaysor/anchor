@@ -4,9 +4,48 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/anchor.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Anchor — Your Personal Homepage</title>
+    <title>Anchor</title>
     <meta name="description" content="Anchor is a fast, local-first personal browser homepage with bookmarks, boards, to-dos, theming, and wallpapers. No accounts, no server." />
-    <meta name="theme-color" content="#2e1065" />
+    <meta name="theme-color" content="#08081a" />
+    <style>
+      html, body {
+        background-color: #08081a;
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        overflow: hidden;
+      }
+    </style>
+    <script>
+      /* Pre-hydration instant theme loader to eliminate flash of unstyled theme */
+      try {
+        const raw = localStorage.getItem('anchor-data') || localStorage.getItem('anchor-v1');
+        if (raw) {
+          const s = JSON.parse(raw);
+          if (s && s.theme) {
+            const p = s.theme.presetId;
+            let top = '#1e1b4b', mid = '#0f0d2e', bot = '#08081a';
+            if (p === 'slate') { top = '#334155'; mid = '#1e293b'; bot = '#020617'; }
+            else if (p === 'violet') { top = '#4c1d95'; mid = '#2e1065'; bot = '#0f0a1e'; }
+            else if (p === 'emerald') { top = '#064e3b'; mid = '#022c22'; bot = '#010f0a'; }
+            else if (p === 'graphite') { top = '#27272a'; mid = '#18181b'; bot = '#09090b'; }
+            else if (p === 'carbon') { top = '#1c1c1c'; mid = '#111111'; bot = '#080808'; }
+            else if (p === 'rose') { top = '#881337'; mid = '#4c0519'; bot = '#1a000a'; }
+            else if (p === 'ocean') { top = '#0c4a6e'; mid = '#082f49'; bot = '#020f18'; }
+            else if (p === 'midnight') { top = '#0f1729'; mid = '#080f1f'; bot = '#040810'; }
+            else if (p === 'sunset') { top = '#7c2d12'; mid = '#431407'; bot = '#150500'; }
+            else if (p === 'forest') { top = '#14532d'; mid = '#052e16'; bot = '#010e07'; }
+            else if (s.theme.custom) { top = s.theme.custom.top; mid = s.theme.custom.middle; bot = s.theme.custom.bottom; }
+            document.documentElement.style.setProperty('--color-top', top);
+            document.documentElement.style.setProperty('--color-middle', mid);
+            document.documentElement.style.setProperty('--color-bottom', bot);
+          }
+          if (s && s.labelColors && s.labelColors.activePage) {
+            document.documentElement.style.setProperty('--accent', s.labelColors.activePage);
+          }
+        }
+      } catch (e) {}
+    </script>
   </head>
   <body>
     <div id="root"></div>
