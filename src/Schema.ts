@@ -184,14 +184,14 @@ export interface WallpaperPreset {
 
 export const WALLPAPER_PRESETS: WallpaperPreset[] = [
   { id: 'none', label: 'None', url: '' },
-  { id: 'w1', label: '', url: 'https://raw.githubusercontent.com/dorukaysor/anchor/main/wallpaper/0001.jpg?w=1920&q=80&auto=format&fit=crop' },
-  { id: 'w2', label: '', url: 'https://raw.githubusercontent.com/dorukaysor/anchor/main/wallpaper/0002.jpg?w=1920&q=80&auto=format&fit=crop' },
-  { id: 'w3', label: '', url: 'https://raw.githubusercontent.com/dorukaysor/anchor/main/wallpaper/0011.jpg?w=1920&q=80&auto=format&fit=crop' },
-  { id: 'w4', label: '', url: 'https://raw.githubusercontent.com/dorukaysor/anchor/main/wallpaper/0013.jpg?w=1920&q=80&auto=format&fit=crop' },
-  { id: 'w5', label: '', url: 'https://raw.githubusercontent.com/dorukaysor/anchor/main/wallpaper/0016.jpg?w=1920&q=80&auto=format&fit=crop' },
-  { id: 'w6', label: '', url: 'https://raw.githubusercontent.com/dorukaysor/anchor/main/wallpaper/0017.jpg?w=1920&q=80&auto=format&fit=crop' },
-  { id: 'w7', label: '', url: 'https://raw.githubusercontent.com/dorukaysor/anchor/main/wallpaper/0021.jpg?w=1920&q=80&auto=format&fit=crop' },
-  { id: 'w8', label: '', url: 'https://raw.githubusercontent.com/dorukaysor/anchor/main/wallpaper/0022.jpg?w=1920&q=80&auto=format&fit=crop' },
+  { id: 'w1', label: '', url: 'https://raw.githubusercontent.com/dorukaysor/anchor/main/wallpapers/0001.jpg?w=1920&q=80&auto=format&fit=crop' },
+  { id: 'w2', label: '', url: 'https://raw.githubusercontent.com/dorukaysor/anchor/main/wallpapers/0002.jpg?w=1920&q=80&auto=format&fit=crop' },
+  { id: 'w3', label: '', url: 'https://raw.githubusercontent.com/dorukaysor/anchor/main/wallpapers/0011.jpg?w=1920&q=80&auto=format&fit=crop' },
+  { id: 'w4', label: '', url: 'https://raw.githubusercontent.com/dorukaysor/anchor/main/wallpapers/0013.jpg?w=1920&q=80&auto=format&fit=crop' },
+  { id: 'w5', label: '', url: 'https://raw.githubusercontent.com/dorukaysor/anchor/main/wallpapers/0016.jpg?w=1920&q=80&auto=format&fit=crop' },
+  { id: 'w6', label: '', url: 'https://raw.githubusercontent.com/dorukaysor/anchor/main/wallpapers/0017.jpg?w=1920&q=80&auto=format&fit=crop' },
+  { id: 'w7', label: '', url: 'https://raw.githubusercontent.com/dorukaysor/anchor/main/wallpapers/0021.jpg?w=1920&q=80&auto=format&fit=crop' },
+  { id: 'w8', label: '', url: 'https://raw.githubusercontent.com/dorukaysor/anchor/main/wallpapers/0022.jpg?w=1920&q=80&auto=format&fit=crop' },
 ]
 
 // ── Search engines ────────────────────────────────────────────────────────────
