@@ -103,8 +103,8 @@ export const DEFAULT_STATE: AppState = {
   glassEnabled: true,
   bookmarkDisplay: 'title-url',
   labelColors: {
-    activePage: '#000000',
-    linkButton: '#0e0e0e',
+    activePage: '#FFFFFF',
+    linkButton: '#262626',
   },
   collapsedSections: {},
   pages: [
